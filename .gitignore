@@ -1,0 +1,20 @@
+# Ignore environment files
+.env
+
+# Ignore data files
+data/raw_data/
+data/processed_data/        
+
+# Ignore Python cache
+__pycache__/
+*.py[cod]
+
+# Ignore virtual environment folder
+venv/
+
+# Ignore system/IDE files
+.DS_Store
+*.swp
+*.log
+.vscode/
+.idea/
