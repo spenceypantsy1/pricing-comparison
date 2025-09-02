@@ -8,17 +8,17 @@ import numpy as np
 data = np.arange(10)
 
 # Initialize your rolling split
-splitter = RollingSplit(train_size=3, test_size=2, step_size=2)
+splitter = RollingSplit(train_size=3, val_size = 2, test_size=2, step_size=2)
 
 # Loop through splits and print
-for train_idx, test_idx in splitter.split(data):
-    print("-" * 40)
-    print("Rolling Split - Train:", train_idx, "Test:", test_idx)
+# for train_idx, val_idx, test_idx in splitter.split(data):
+#     print("-" * 40)
+#     print("Rolling Split - Train:", train_idx, "Val", val_idx, "Test:", test_idx)
 
 print("=" * 40)
 splitter = ExpandingSplit(test_size=2, step_size=2)
 
-# Loop through splits and print
-for train_idx, test_idx in splitter.split(data):
-    print("-" * 40)
-    print("Expanding Split - Train:", train_idx, "Test:", test_idx)
+# # Loop through splits and print
+# for train_idx, test_idx in splitter.split(data):
+#     print("-" * 40)
+#     print("Expanding Split - Train:", train_idx, "Test:", test_idx)

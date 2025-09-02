@@ -34,10 +34,12 @@ class ExpandingSplit:
             print("Train indices:", train_idx, "Test indices:", test_idx)
 
 
+# Used primarily for ML/DL rolling models
 class RollingSplit:
-    def __init__(self, train_size, test_size, step_size = 1):
+    def __init__(self, train_size, val_size, test_size, step_size = 1):
         self.train_size = train_size                    # train size (int) = number of samples in the training set per split
         self.test_size = test_size                      # test size (int) = number of samples in the test set per split
+        self.val_size = val_size                        # validation size (int) = number of samples in the validation set per split
         self.step_size = step_size                      # step size (int) = how much to move forward split each iteration
 
     def split(self, data):
@@ -46,12 +48,16 @@ class RollingSplit:
 
         start = 0 
 
-        while start + self.train_size + self.test_size <= n:
-            train_idx = np.arange(start, start + self.train_size)
-            test_idx = np.arange(start + self.train_size, start + self.train_size + self.test_size)
-            yield train_idx, test_idx
+        while start + self.train_size + self.test_size + self.val_size <= n:
+            train_idx = np.arange(start, 
+                                  start + self.train_size)
+            val_idx = np.arange(start + self.train_size, 
+                                start + self.train_size + self.val_size)
+            test_idx = np.arange(start + self.train_size + self.val_size,
+                                 start + self.train_size + self.val_size + self.test_size)
+            yield train_idx, val_idx, test_idx
             start += self.step_size             # move start forward by stepsize until we reach <= n as above
-            print("Train indices:", train_idx, "Test indices:", test_idx)
+            print("Train indices:", train_idx, "Val Indices", val_idx, "Test indices:", test_idx)
 
 
 
@@ -59,14 +65,13 @@ class RollingSplit:
 """
 Total samples: 10
 ----------------------------------------
-Rolling Split - Train: [0 1 2] Test: [3 4]
-Train indices: [0 1 2] Test indices: [3 4]
+Rolling Split - Train: [0 1 2] Val [3 4] Test: [5 6]
+Train indices: [0 1 2] Val Indices [3 4] Test indices: [5 6]
 ----------------------------------------
-Rolling Split - Train: [2 3 4] Test: [5 6]
-Train indices: [2 3 4] Test indices: [5 6]
-----------------------------------------
-Rolling Split - Train: [4 5 6] Test: [7 8]
-Train indices: [4 5 6] Test indices: [7 8]
+Rolling Split - Train: [2 3 4] Val [5 6] Test: [7 8]
+Train indices: [2 3 4] Val Indices [5 6] Test indices: [7 8]
+
+
 ========================================
 Total samples: 10
 ----------------------------------------
