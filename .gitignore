@@ -1,13 +1,13 @@
 # Ignore environment files
 .env
+**/.env
 
 # Ignore data files
-data/raw_data/
-data/processed_data/        
+data/      
 
 # Ignore Python cache
+**/__pycache__/
 __pycache__/
-*.py[cod]
 
 # Ignore virtual environment folder
 venv/
@@ -19,3 +19,6 @@ venv/
 .vscode/
 .idea/
 *.docx
+
+# Ignore Jupyter Notebook checkpoints
+.ipynb_checkpoints/
