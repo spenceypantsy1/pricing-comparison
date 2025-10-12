@@ -33,7 +33,7 @@ class MarketDataDownloader:
             # asset: str,
             # ticker: str,
             interval = '1d',
-            lookback = None,
+            lookback:str = None,
             start = None,
             end = None):
         
@@ -195,7 +195,7 @@ class MarketDataDownloader:
             current_start = last_ts_ms + interval_ms
 
             # Avoid spamming the API
-            time.sleep(0.5)
+            time.sleep(1)
 
             # If returned fewer than limit, probably reached end range
             if len(data) < limit:
@@ -210,23 +210,54 @@ class MarketDataDownloader:
         return result
 
 
-    def _fetch_stock(self):
-        df = yf.download(self.ticker, start=self.start_dt, end=self.end_dt, interval=self.interval)
-        if df.empty:
-            print("No data fetched from Yahoo Finance.")
+    # Main method for fetching from YF, build furhter YF-specific methods on top of this
+    def _fetch_yf(self, yf_ticker):
+        try:
+            df = yf.download(
+                yf_ticker,
+                start=self.start_dt,
+                end=self.end_dt,
+                interval=self.interval,
+                auto_adjust=False  # optional, to suppress FutureWarning
+            )
+
+            if df.empty:
+                print(f"No data fetched for {yf_ticker}.")
+                return pd.DataFrame(columns=['timestamp','open','high','low','close','volume'])
+
+            # Reset index to turn DatetimeIndex into a column
+            df = df.reset_index()
+
+            # Determine which column is the timestamp
+            if 'Date' in df.columns:                # For interday, it returns the column as 'Date'
+                timestamp_col = 'Date'
+            else:                                   # For intraday, it returns the column as 'Datetime'
+                timestamp_col = 'Datetime'
+
+            # Rename columns to standard names
+            df.rename(columns={
+                timestamp_col: 'timestamp',
+                'Open': 'open',
+                'High': 'high',
+                'Low': 'low',
+                'Close': 'close',
+                'Volume': 'volume'
+            }, inplace=True)
+
+            # Keep only the columns we care about
+            df = df[['timestamp','open','high','low','close','volume']]
+
             return df
-        df = df.reset_index()
-        df.rename(columns = {
-            'Date': 'timestamp',
-            'Open': 'open',
-            'High': 'high',
-            'Low': 'low',
-            'Close': 'close',
-            'Volume': 'volume'
-        }, inplace = True)
-        df = df[['timestamp', 'open', 'high', 'low', 'close', 'volume']]
-        return df
-    
+
+        except Exception as e:
+            print(f"Failed to fetch {yf_ticker}: {e}")
+            return pd.DataFrame(columns=['timestamp','open','high','low','close','volume'])
+
+    def _fetch_stock(self, ticker=None):
+        if ticker is None:
+            ticker = self.ticker
+        return self._fetch_yf(ticker)
+
     def _fetch_forex(self):
-        self.ticker = self.ticker.replace('/', '') + "=X"
-        return self._fetch_stock() # Can use YF to fetch Forex as well
+        yf_ticker = self.ticker.replace('/', '') + "=X"
+        return self._fetch_yf(yf_ticker)
