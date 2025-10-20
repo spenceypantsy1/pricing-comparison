@@ -29,7 +29,8 @@ class ExpandingSplit:
         for test_start in range(start, end, self.step_size):
             train_idx = np.arange(0, test_start + 1)
             test_idx = np.arange(test_start + 1, test_start + 1 + self.test_size)
-            if test_idx[-1] < n:
+            if test_idx[0] < n:
+                test_idx = test_idx[test_idx < n]       # clipping to the end of data
                 yield train_idx, test_idx
             print("Train indices:", train_idx, "Test indices:", test_idx)
 
